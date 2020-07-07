@@ -16,5 +16,6 @@ thiserror = "1.0"
 webpki = "0.21"
 x509-parser = "0.8.0-beta3"
 lazy_static = "1.4"
+percent-encoding = "2.1.0"
 
 ra-common = { path = "../ra-common" }

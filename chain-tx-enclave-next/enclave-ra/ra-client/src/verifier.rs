@@ -1,5 +1,5 @@
 use std::{collections::HashSet, sync::Arc, time::SystemTime};
-
+use percent_encoding::percent_decode;
 use chrono::{DateTime, Duration, Utc};
 use der_parser::oid::Oid;
 use lazy_static::lazy_static;
@@ -148,12 +148,14 @@ impl EnclaveCertVerifier {
 
         let attestation_report: AttestationReport = serde_json::from_slice(attestation_report)?;
 
-        let signing_certs = certs(&mut attestation_report.signing_cert.as_ref())
+        let a = attestation_report.signing_cert.clone();
+        let cert_string = percent_decode(a.as_slice()).decode_utf8().unwrap();
+        let signing_certs = certs(&mut cert_string.as_bytes())
             .map_err(|_| EnclaveCertVerifierError::CertificateParsingError)?;
 
         for signing_cert in signing_certs {
             let signing_cert = EndEntityCert::from(&signing_cert.0)?;
-
+            
             signing_cert.verify_is_valid_tls_server_cert(
                 SUPPORTED_SIG_ALGS,
                 &TLSServerTrustAnchors(&trust_anchors),
